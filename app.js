@@ -5,6 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 
 const config = require('./utils/config')
+const logger = require('./utils/logger')
 
 morgan.token('res-body', function getId(req) {
   return JSON.stringify(req.body)
@@ -13,14 +14,14 @@ morgan.token('res-body', function getId(req) {
 const blogsRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
 
-console.log('connecting to', config.MONGODB_URI)
+logger.info('connecting to', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .then(() => {
-    console.log('connected to MongoDB')
+    logger.info('connected to MongoDB')
   })
   .catch(err => {
-    console.log('error connecting to MongoDB: ', err.message)
+    logger.error('error connecting to MongoDB: ', err.message)
   })
 
 const app = express()
@@ -28,7 +29,9 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :res-body '))
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :res-body '))
+}
 app.use('/api/blogs', blogsRouter)
 
 app.use(middleware.unknownEndpoint)
