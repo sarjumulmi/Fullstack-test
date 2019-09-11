@@ -12,6 +12,8 @@ morgan.token('res-body', function getId(req) {
 })
 
 const blogsRouter = require('./controllers/blogs')
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const middleware = require('./utils/middleware')
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -32,8 +34,10 @@ app.use(middleware.requestLogger)
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan(':method :url :status :res[content-length] - :response-time ms :res-body '))
 }
+app.use(middleware.tokenExtractor)
 app.use('/api/blogs', blogsRouter)
-
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 

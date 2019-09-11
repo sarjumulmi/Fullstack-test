@@ -3,43 +3,39 @@ mongoose.set('useFindAndModify', false)
 
 const uniqueValidator = require('mongoose-unique-validator')
 
-const blogSchema = new mongoose.Schema({
-  title: {
+const userSchema = mongoose.Schema({
+  username: {
     type: String,
     required: true,
-    minlength: 3,
     unique: true,
-    index: true
+    index: true,
+    minlength: 3,
   },
-  author: {
+  name: {
     type: String,
     required: true
   },
-  url: {
+  passwordHash: {
     type: String,
     required: true
   },
-  likes: {
-    type: Number,
-    min: 0,
-    default: 0
-  },
-  user: {
+  blogs: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
+    ref: 'Blog'
+  }]
 })
 
-blogSchema.plugin(uniqueValidator)
+userSchema.plugin(uniqueValidator)
 
-blogSchema.set('toJSON', {
+userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
+    // delete returnedObject.passwordHash
   }
 })
 
-const Blog = mongoose.model('Blog', blogSchema)
+const User = mongoose.model('User', userSchema)
 
-module.exports = Blog
+module.exports = User
